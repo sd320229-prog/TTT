@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Do You Love Me? 💘</title>
+  <style>
+    :root{
+      --bg1:#ffe8f1;
+      --bg2:#fff7fb;
+      --card:#ffffffdd;
+      --text:#2b2b2b;
+      --accent:#ff4d8d;
+      --yes:#22c55e;
+      --no:#ef4444;
+      --shadow:0 10px 30px rgba(0,0,0,.06);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 80% -20%, var(--bg1), transparent),
+                  radial-gradient(1200px 800px at -10% 120%, var(--bg2), transparent),
+                  #fff;
+      overflow:hidden;
+    }
+    .wrap{
+      height:100%;
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+    .card{
+      width:min(560px, 92vw);
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(6px);
+      padding:28px 24px 22px;
+      text-align:center;
+      position:relative;
+    }
+    h1{
+      font-size: clamp(24px, 5vw, 34px);
+      margin:8px 0 10px;
+    }
+    .subtitle{
+      color:#666;
+      margin-bottom:22px;
+    }
+    .buttons{
+      position:relative;
+      width:100%;
+      height:200px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    button{
+      border:0;
+      padding:14px 20px;
+      border-radius:999px;
+      font-weight:700;
+      cursor:pointer;
+      transition: transform .08s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+      font-size:16px;
+    }
+    .btn-yes{
+      background:linear-gradient(135deg, var(--yes), #16a34a);
+      color:#fff;
+    }
+    .btn-no{
+      background:linear-gradient(135deg, var(--no), #dc2626);
+      color:#fff;
+      position:absolute;
+      left:55%;
+      top:50%;
+      transform: translate(-50%,-50%);
+    }
+    .msg{
+      margin-top:14px;
+      font-size:18px;
+      font-weight:600;
+      color:var(--accent);
+      min-height:1.4em;
+    }
+    .hint{
+      margin-top:8px;
+      font-size:12px;
+      color:#888;
+    }
+    .hearts-container{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:10;
+    }
+    .heart{
+      position:absolute;
+      font-size: 20px;
+      color:red;
+      animation: fall linear forwards;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15));
+    }
+    @keyframes fall{
+      0%{ transform: translateY(-10vh) rotate(0deg); opacity:0 }
+      10%{ opacity:1 }
+      100%{ transform: translateY(110vh) rotate(360deg); opacity:.9 }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Do you love me? 💞</h1>
+      <p class="subtitle">सच-सच बताओ… 😄</p>
+      <div class="buttons" id="play-area">
+        <button class="btn-yes" id="yesBtn">Yes 😍</button>
+        <button class="btn-no" id="noBtn">No 🙈</button>
+      </div>
+      <div class="msg" id="msg"></div>
+      <div class="hint" id="hint">Tip: “No” बटन थोड़ा शरारती है… पकड़ कर दिखाओ! 😜</div>
+    </div>
+  </div>
+
+  <div class="hearts-container" id="hearts"></div>
+
+  <script>
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const msg = document.getElementById('msg');
+    const playArea = document.getElementById('play-area');
+    const hearts = document.getElementById('hearts');
+    let dodgeCount = 0;
+    let locked = false;
+
+    function moveNo(){
+      const areaRect = playArea.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+      const pad = 8;
+      const maxLeft = areaRect.width - btnRect.width - pad;
+      const maxTop  = areaRect.height - btnRect.height - pad;
+      let x = Math.random() * maxLeft + pad/2;
+      let y = Math.random() * maxTop  + pad/2;
+      noBtn.style.left = x + 'px';
+      noBtn.style.top  = y + 'px';
+      noBtn.style.transform = 'translate(0,0)';
+    }
+
+    function spawnHeart(){
+      const el = document.createElement('div');
+      el.className = 'heart';
+      el.textContent = '❤️';
+      const startLeft = Math.random()*100;
+      const duration = 2 + Math.random()*2;
+      const size = 16 + Math.random()*20;
+      el.style.left = startLeft + 'vw';
+      el.style.top = '-5vh';
+      el.style.fontSize = size + 'px';
+      el.style.animationDuration = duration + 's';
+      hearts.appendChild(el);
+      setTimeout(()=> el.remove(), duration*1000 + 200);
+    }
+
+    ['mouseenter','touchstart'].forEach(evt=>{
+      noBtn.addEventListener(evt, ()=>{
+        if(locked) return;
+        dodgeCount++;
+        moveNo();
+        msg.textContent = dodgeCount < 3 ? "पकड़ सकते हो? 😜" : "Yes पर क्लिक कर दो 😉";
+      });
+    });
+
+    document.addEventListener('mousemove', (e)=>{
+      if(locked) return;
+      const r = noBtn.getBoundingClientRect();
+      const distX = Math.max(0, Math.max(r.left - e.clientX, e.clientX - r.right));
+      const distY = Math.max(0, Math.max(r.top - e.clientY, e.clientY - r.bottom));
+      const dist = Math.hypot(distX, distY);
+      if(dist < 60){
+        dodgeCount++;
+        moveNo();
+        msg.textContent = "मुझे पता है तुम Yes ही बोलोगे 😏";
+      }
+    });
+
+    yesBtn.addEventListener('click', ()=>{
+      if(locked) return;
+      locked = true;
+      msg.textContent = "मुझे पता था! ❤️";
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+
+      // तुरंत Instagram DM लिंक खोलना (नई टैब में)
+      window.open("https://ig.me/m/harshit_dj_ff_199", "_blank");
+
+      // 5 सेकंड तक दिल गिरेंगे
+      const heartRain = setInterval(spawnHeart, 100);
+      setTimeout(()=>{
+        clearInterval(heartRain);
+      }, 5000);
+    });
+
+    window.addEventListener('load', moveNo);
+  </script>
+</body>
+</html>
